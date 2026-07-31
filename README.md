@@ -45,3 +45,6 @@ I prevent this by making the storage queues large enough to hold backups and set
 Interrupt Delays
 A nurse station emergency alarm might take too long to go off if the processor is busy doing background work when the button is pressed. 
 I avoid this by keeping the actual button interrupt code incredibly short and immediately passing the heavy lifting off to a dedicated high-priority task.
+
+#AI Disclosure
+Used Google Gemini and Claude for github related questions, the task table calculations and for merging the apps for main programing code.
