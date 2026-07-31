@@ -5,9 +5,11 @@
 
 For the final capstone project used the ESP32 microcontroller to run a simulated medical monitoring system (theme chosen).
 
+The primary goal of this project is to demonstrate how a Real-Time Operating System (FreeRTOS) can safely manage multiple competing tasks in an environment where strict timing is required. To illustrate this, the system is themed around a hospital Intensive Care Unit (ICU) telemetry monitor and resource manager. In a real-world medical setting, a delayed heartbeat reading or a missed emergency alarm is a critical safety failure.
+
 The code uses FreeRTOS to juggle multiple tasks at once, ensuring that critical medical alarms happen instantly.
-Core 0 handles all the Wi-Fi and networking to host a live dashboard on a web browser.
-Core 1 does all the heavy lifting by running the medical data pipeline and managing hospital resources.
+Core 0 is entirely dedicated to user interface and communication. Essentially it handles all the Wi-Fi and networking to host a live dashboard on a web browser.
+Core 1 does all the heavy lifting by running the medical data pipeline and managing hospital resources. It uses Rate Monotonic Scheduling (learned at the beginning of the class) to prioritize four main continuous tasks: reading simulated ECG sensor data, running filtering math to detect heart arrhythmias, verifying alert data integrity, and sorting background logs.
 
 # System Architecture
 
