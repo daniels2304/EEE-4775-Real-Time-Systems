@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICU Telemetry | Final Capstone</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 2rem; background-color: #f9f9f9; }
+        h1, h2, h3 { color: #2c3e50; border-bottom: 2px solid #eaeaea; padding-bottom: 0.5rem; }
+        .container { background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin: 1.5rem 0; border-radius: 8px; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; font-weight: 600; }
+        .links { text-align: center; margin-top: 2rem; }
+        .btn { display: inline-block; background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 0 10px; font-weight: bold; }
+        .btn:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ICU Telemetry & Resource Manager</h1>
+        <p><strong>ESP32 FreeRTOS Integration Capstone</strong></p>
+
+        <h2>Project Overview</h2>
+        <ul>
+            <li>This is my final capstone project using an ESP32 microcontroller to run a simulated medical monitoring system.</li>
+            <li>The code uses FreeRTOS to juggle multiple tasks at once, ensuring that critical medical alarms happen instantly.</li>
+            <li>Core 0 handles all the Wi-Fi and networking to host a live dashboard on a web browser.</li>
+            <li>Core 1 does all the heavy lifting by running the medical data pipeline and managing hospital resources.</li>
+        </ul>
+
+        <h2>Demo Video & Simulation</h2>
+        <p>Watch the 3-minute video below for a full walkthrough of the system architecture, live telemetry dashboard, and a demonstration of an induced priority inversion fault.</p>
+        
+        <div class="video-container">
+            <!-- REPLACE THE SRC LINK BELOW WITH YOUR YOUTUBE EMBED LINK -->
+            <iframe src="YOUTUBE_EMBED_LINK_HERE" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        
+        <div class="links">
+            <!-- REPLACE THE HREF LINK BELOW WITH YOUR WOKWI LINK -->
+            <a href="WOKWI_LINK_HERE" target="_blank" class="btn">View Live Wokwi Simulation</a>
+        </div>
+
+        <h2>System Architecture</h2>
+        <ul>
+            <li>The system uses safe data pipelines to pass heart rate information between tasks without dropping it.</li>
+            <li>A counting system manages four hospital wards sharing a pool of three MRI machines.</li>
+            <li>A lock protects the pharmacy medication count so two users cannot accidentally update it at the exact same time.</li>
+            <li>A physical emergency button uses a hardware interrupt to bypass regular tasks and trigger an immediate alarm.</li>
+        </ul>
+
+        <h2>Task Execution & WCET Evidence</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Task (Priority)</th>
+                    <th>Run Schedule</th>
+                    <th>Time to Run & Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>ECG Sample (15)</strong></td>
+                    <td>10 ms</td>
+                    <td><strong>224 &micro;s:</strong> Acts like a sensor reading patient data and sending it down the line.</td>
+                </tr>
+                <tr>
+                    <td><strong>Arrhythmia (10)</strong></td>
+                    <td>20 ms</td>
+                    <td><strong>1893 &micro;s:</strong> Reads the data and checks for an irregular heartbeat.</td>
+                </tr>
+                <tr>
+                    <td><strong>Alarm Dispatch (5)</strong></td>
+                    <td>40 ms</td>
+                    <td><strong>120 &micro;s:</strong> Double-checks the data to make sure no emergency alerts got corrupted.</td>
+                </tr>
+                <tr>
+                    <td><strong>System Log (2)</strong></td>
+                    <td>100 ms</td>
+                    <td><strong>0 &micro;s:</strong> Starved out whenever more important tasks need to run.</td>
+                </tr>
+                <tr>
+                    <td><strong>IV Drip ISR</strong></td>
+                    <td>Hardware Edge</td>
+                    <td><strong>~25 &micro;s:</strong> Jumps the line to alert the nurse station instantly when the IV is empty.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Hazard Analysis & Fault Injection</h2>
+        <p><strong>Priority Inversion</strong><br>A critical medical task can get stuck waiting forever if a lower-priority task holds onto a shared lock and gets interrupted by a medium-priority task. We fix this by turning on priority inheritance, which temporarily boosts the lower task's priority so it can finish faster and release the lock.</p>
+        
+        <p><strong>Data Queue Overflow</strong><br>Patient data can be permanently lost if the system generates heart rate readings much faster than it can process them. We prevent this by making the storage queues large enough to hold backups and setting strict task priorities so the processor always keeps up with the incoming data.</p>
+        
+        <p><strong>Interrupt Delays</strong><br>A nurse station emergency alarm might take too long to go off if the processor is busy doing background work when the button is pressed. We avoid this by keeping the actual button interrupt code incredibly short and immediately passing the heavy lifting off to a dedicated high-priority task.</p>
+    </div>
+</body>
+</html>
